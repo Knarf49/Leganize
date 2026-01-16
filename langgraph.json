@@ -1,0 +1,16 @@
+{
+  "node_version": "20",
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./apps/agents/src/react-agent/graph.ts:graph",
+    "memory_agent": "./apps/agents/src/memory-agent/graph.ts:graph",
+    "retrieval_agent": "./apps/agents/src/retrieval-agent/graph.ts:graph"
+  },
+  "env": ".env",
+  "configurable": {
+    "retrieverProvider": "chroma",
+    "embeddingModel": "openai/text-embedding-3-small",
+    "responseModel": "openai/gpt-4-turbo",
+    "queryModel": "openai/gpt-3.5-turbo"
+  }
+}
