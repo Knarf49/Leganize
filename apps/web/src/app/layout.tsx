@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter, Roboto } from "next/font/google";
+import { Roboto } from "next/font/google";
 
 import React from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
