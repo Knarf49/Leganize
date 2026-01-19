@@ -114,7 +114,7 @@ async function makeChromaDBRetriever(
   }
 
   // Global collection "law" accessible to all users
-  const collectionName = "law";
+  const collectionName = "law_split";
 
   const vectorStore = new Chroma(embeddingModel, {
     collectionName,

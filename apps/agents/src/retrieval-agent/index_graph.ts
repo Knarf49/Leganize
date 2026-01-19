@@ -95,10 +95,10 @@ async function indexDocs(
 
   // Use user-specific collection for new documents
   const retriever = await makeUserSpecificChromaRetriever(
-    userId,
+    userId as string,
     embeddingModel
   );
-  const stampedDocs = ensureDocsHaveUserId(docs, userId);
+  const stampedDocs = ensureDocsHaveUserId(docs, userId as string);
 
   await retriever.addDocuments(stampedDocs);
   return { docs: "delete" };

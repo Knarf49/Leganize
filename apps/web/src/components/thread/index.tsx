@@ -377,7 +377,7 @@ export function Thread() {
               </>
             }
             footer={
-              <div className="sticky flex flex-col items-center gap-8 bottom-0 bg-white">
+              <div className="fixed flex flex-col items-center gap-8  pb-8 bottom-0 w-full">
                 {!chatStarted && (
                   <div className="flex gap-3 items-center">
                     <LangGraphLogoSVG className="shrink-0 h-8" />

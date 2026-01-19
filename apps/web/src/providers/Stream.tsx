@@ -48,7 +48,9 @@ async function checkGraphStatus(
   apiKey: string | null,
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${apiUrl}/info`, {
+    // Remove trailing slash from apiUrl to prevent double slashes
+    const normalizedUrl = apiUrl.replace(/\/$/, "");
+    const res = await fetch(`${normalizedUrl}/info`, {
       ...(apiKey && {
         headers: {
           "X-Api-Key": apiKey,
