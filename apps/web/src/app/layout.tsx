@@ -29,7 +29,9 @@ export default function RootLayout({
         <SessionProvider>
           <NuqsAdapter>
             <Navbar />
-            {children}
+            <main className="container py-18 border-2 min-h-screen mx-auto px-4">
+              {children}
+            </main>
             <MobileNav />
           </NuqsAdapter>
         </SessionProvider>

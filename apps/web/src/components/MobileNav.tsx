@@ -9,6 +9,7 @@ import {
   ClipboardCheckIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type BottomMenuItem = {
   key: string;
@@ -74,17 +75,19 @@ export default function MobileNav({
 
         return (
           <MenubarMenu key={menu.key}>
-            <MenubarTrigger
-              onClick={() => onChange?.(menu.key)}
-              className={cn(
-                "flex h-full w-full flex-col items-center justify-center gap-1 rounded-none",
-                "text-xs text-muted-foreground",
-                isActive && "text-primary",
-              )}
-            >
-              {menu.icon}
-              <span className="leading-none">{menu.label}</span>
-            </MenubarTrigger>
+            <Link href={menu.href} className="flex-1">
+              <MenubarTrigger
+                onClick={() => onChange?.(menu.key)}
+                className={cn(
+                  "flex h-full w-full flex-col items-center justify-center gap-1 rounded-none",
+                  "text-xs text-muted-foreground",
+                  isActive && "text-primary",
+                )}
+              >
+                {menu.icon}
+                <span className="leading-none">{menu.label}</span>
+              </MenubarTrigger>
+            </Link>
           </MenubarMenu>
         );
       })}

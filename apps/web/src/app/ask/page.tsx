@@ -9,9 +9,7 @@ function AskPageContent() {
   return (
     <ThreadProvider>
       <StreamProvider>
-        <div className="py-18">
-          <Thread />
-        </div>
+        <Thread />
       </StreamProvider>
     </ThreadProvider>
   );

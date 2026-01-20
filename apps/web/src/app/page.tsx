@@ -10,7 +10,7 @@ export default function DashboardPage() {
   return (
     <div>
       <Toaster />
-      <div className="py-18 container mx-auto px-4 space-y-6">
+      <div className="space-y-6">
         <MenuCard
           type="board meeting"
           title="Q4 Board Review"
