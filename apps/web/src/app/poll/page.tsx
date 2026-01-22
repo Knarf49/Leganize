@@ -3,9 +3,11 @@ import { PollItems } from "@/components/poll/PollItem";
 import { Button } from "@/components/ui/button";
 import { usePollList } from "@/lib/models/hook";
 import Link from "next/link";
+import Ably from "ably";
+import { AblyProvider } from "ably/react";
 
 //   mutationId: string,userId: string,question: string,options: string[],
-export default function PollListPage() {
+function PollList() {
   const [polls, _] = usePollList();
 
   if (!polls) return <div>Loading...</div>;
@@ -29,5 +31,17 @@ export default function PollListPage() {
         <PollItems key={poll.id} poll={poll} />
       ))}
     </div>
+  );
+}
+
+export default function PollListPage() {
+  const client = new Ably.Realtime({
+    key: process.env.NEXT_PUBLIC_ABLY_API_KEY,
+  });
+
+  return (
+    <AblyProvider client={client}>
+      <PollList />
+    </AblyProvider>
   );
 }

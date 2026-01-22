@@ -7,6 +7,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
+import { ToastContainer } from "react-toastify";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
             <main className="container py-18 min-h-screen mx-auto px-4">
               {children}
             </main>
+            <ToastContainer hideProgressBar />
             <MobileNav />
           </NuqsAdapter>
         </SessionProvider>

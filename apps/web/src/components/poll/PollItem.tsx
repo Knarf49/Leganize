@@ -1,14 +1,15 @@
 // components/poll/PollItems.tsx
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PollOption } from "./PollOption";
 import type { PollType } from "@/lib/poll";
 import { vote } from "@/lib/models/mutations";
 import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
-//TODO: แก้ให้ poll update แบบ realtime
+import { usePoll } from "@/lib/models/hook";
+import { toast } from "react-toastify";
+
 type PollItemsProps = {
   poll: PollType;
   onVote?: (optionId: string) => void;
@@ -17,53 +18,81 @@ type PollItemsProps = {
 };
 
 export function PollItems({
-  poll,
+  poll: initialPoll,
   onVote,
   showResult = true,
   className,
 }: PollItemsProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    poll.userVote ?? null,
-  );
-  const [isVoting, setIsVoting] = useState(false);
-
+  const [poll, model] = usePoll(initialPoll.id);
   const session = useSession();
   const userId = session.data?.user?.id;
   const isSessionLoading = session.status === "loading";
 
+  // Use poll from model if available, otherwise use initial poll
+  const currentPoll = poll || initialPoll;
+  const selectedId = currentPoll.userVote ?? null;
+
   const handleVote = async (optionId: string) => {
     if (!userId) {
-      console.warn("User must be logged in to vote");
+      toast.error("You must be logged in to vote");
       return;
     }
 
-    const previousSelection = selectedId;
-    setSelectedId(optionId);
-    setIsVoting(true);
+    if (!model) {
+      console.warn("Model not ready");
+      return;
+    }
+
+    const mutationId = uuidv4();
+
+    // Calculate optimistic update
+    const optimisticPoll: PollType = {
+      ...currentPoll,
+      userVote: optionId,
+      options: currentPoll.options.map((opt) => {
+        if (opt.id === optionId) {
+          // Increase vote count for new selection
+          return { ...opt, voteCount: opt.voteCount + 1 };
+        } else if (opt.id === selectedId) {
+          // Decrease vote count for previous selection
+          return { ...opt, voteCount: Math.max(0, opt.voteCount - 1) };
+        }
+        return opt;
+      }),
+      totalVotes:
+        selectedId === null
+          ? currentPoll.totalVotes + 1
+          : currentPoll.totalVotes,
+    };
+
+    const [confirmed, cancel] = await model.optimistic({
+      mutationId,
+      name: "vote",
+      data: { poll: optimisticPoll },
+    });
 
     try {
-      const mutationId = uuidv4();
-      await vote(mutationId, userId, poll.id, optionId);
+      await vote(mutationId, userId, currentPoll.id, optionId);
+      await confirmed;
       onVote?.(optionId);
     } catch (error) {
       console.error("Failed to vote:", error);
-      setSelectedId(previousSelection);
-    } finally {
-      setIsVoting(false);
+      toast.error(error instanceof Error ? error.message : "Failed to vote");
+      cancel();
     }
   };
 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="text-base">{poll.question}</CardTitle>
+        <CardTitle className="text-base">{currentPoll.question}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {poll.options.map((option) => {
+        {currentPoll.options.map((option) => {
           const percentage =
-            poll.totalVotes > 0
-              ? Math.round((option.voteCount / poll.totalVotes) * 100)
+            currentPoll.totalVotes > 0
+              ? Math.round((option.voteCount / currentPoll.totalVotes) * 100)
               : 0;
 
           return (
@@ -74,7 +103,7 @@ export function PollItems({
               votes={option.voteCount}
               percentage={percentage}
               selected={selectedId === option.id}
-              disabled={isVoting || !userId || isSessionLoading}
+              disabled={!model || !userId || isSessionLoading}
               showResult={showResult}
               onSelect={handleVote}
             />

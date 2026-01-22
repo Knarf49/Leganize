@@ -3,13 +3,13 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 import "dotenv/config";
-
+//TODO: change connection string: https://www.prisma.io/docs/guides/neon-accelerate
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL") || env("DIRECT_URL"),
+    url: env("DIRECT_URL"),
   },
 });

@@ -3,13 +3,11 @@ import { MeetingStatusCard } from "@/components/Meeting/MeetingStatus";
 import MenuCard from "@/components/Meeting/MenuCard";
 import { StatusCard } from "@/components/Meeting/StatusCard";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 import { ChevronRight, Shield } from "lucide-react";
 
 export default function DashboardPage() {
   return (
     <div>
-      <Toaster />
       <div className="space-y-6">
         <MenuCard
           type="board meeting"

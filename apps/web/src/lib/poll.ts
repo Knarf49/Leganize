@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma from "./prisma";
 import * as runtime from "@prisma/client/runtime/client.js";
 import {
   Prisma,
