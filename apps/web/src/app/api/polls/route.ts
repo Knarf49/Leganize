@@ -29,10 +29,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const body: {
-      question: string;
-      options: string[];
-    } = await request.json();
+    const body = await request.json();
+
+    // Validate body structure
+    if (!body.question || typeof body.question !== "string") {
+      return NextResponse.json(
+        { message: "question is required and must be a string" },
+        { status: 400 },
+      );
+    }
+
+    if (!Array.isArray(body.options) || body.options.length < 2) {
+      return NextResponse.json(
+        { message: "options must be an array with at least 2 items" },
+        { status: 400 },
+      );
+    }
 
     const poll = await createPoll(userId, body.question, body.options);
 

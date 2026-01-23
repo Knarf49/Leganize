@@ -1,7 +1,15 @@
 import { authConfig } from "./auth.config";
 import NextAuth, { type NextAuthResult } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
 
-const result = NextAuth(authConfig);
+const adapter = PrismaAdapter(prisma);
+
+const result = NextAuth({
+  ...authConfig,
+  adapter: adapter,
+  session: { strategy: "jwt" },
+});
 
 export const handlers: NextAuthResult["handlers"] = result.handlers;
 export const auth: NextAuthResult["auth"] = result.auth;

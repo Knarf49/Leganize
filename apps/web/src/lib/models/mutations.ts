@@ -1,5 +1,3 @@
-import type { PollType } from "@/lib/poll";
-
 export async function createPoll(question: string, options: string[]) {
   const response = await fetch("/api/polls", {
     method: "POST",
@@ -33,7 +31,6 @@ export async function vote(pollId: string, optionId: string) {
  * Edit a poll
  */
 export async function editPoll(
-  mutationId: string,
   id: string,
   question?: string,
   options?: { id?: string; text: string }[],
@@ -41,7 +38,7 @@ export async function editPoll(
   const response = await fetch(`/api/polls/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mutationId, question, options }),
+    body: JSON.stringify({ question, options }),
   });
   if (!response.ok)
     throw new Error(
@@ -53,10 +50,9 @@ export async function editPoll(
 /**
  * Delete a poll
  */
-export async function deletePoll(mutationId: string, id: string) {
+export async function deletePoll(id: string) {
   const response = await fetch(`/api/polls/${id}`, {
     method: "DELETE",
-    headers: { "x-mutation-id": mutationId },
   });
   if (!response.ok)
     throw new Error(
@@ -68,14 +64,9 @@ export async function deletePoll(mutationId: string, id: string) {
 /**
  * Delete a poll option
  */
-export async function deletePollOption(
-  mutationId: string,
-  pollId: string,
-  optionId: string,
-) {
+export async function deletePollOption(pollId: string, optionId: string) {
   const response = await fetch(`/api/polls/${pollId}/options/${optionId}`, {
     method: "DELETE",
-    headers: { "x-mutation-id": mutationId },
   });
   if (!response.ok)
     throw new Error(
@@ -84,99 +75,7 @@ export async function deletePollOption(
   return response.json();
 }
 
-/**
- * Merge function to handle optimistic and confirmed events for polls
- */
-export function mergePoll(
-  existingState: PollType,
-  event: OptimisticEvent | ConfirmedEvent,
-): PollType {
-  // Optimistic and confirmed events use the same merge function logic.
-  // The models function keeps track of the state before events are applied
-  // to make sure the rollback of unconfirmed events works, we need to clone
-  // the state here. Our state contains an array of objects so we don't use
-  // the regular object spread operator.
-  const state = cloneDeep(existingState);
-
-  switch (event.name) {
-    case "createPoll":
-      // This event is typically handled at the list level, not individual poll level
-      console.log("Poll created:", event.data);
-      break;
-
-    case "vote": {
-      const voteData = event.data! as {
-        vote: { userId: string; optionId: string };
-        poll: PollType;
-      };
-      // Update the entire poll state with the new vote counts
-      return voteData.poll;
-    }
-
-    case "editPoll": {
-      const editedPoll = event.data! as PollType;
-      state.question = editedPoll.question;
-      state.options = editedPoll.options;
-      break;
-    }
-
-    case "deletePoll":
-      // This event is typically handled at the list level
-      console.log("Poll deleted:", event.data);
-      break;
-
-    case "deletePollOption": {
-      const deletedOptionData = event.data! as {
-        option: { id: string };
-        poll: PollType;
-      };
-      // Update with the new poll state after option deletion
-      return deletedOptionData.poll;
-    }
-
-    default:
-      console.error("unknown poll event", event);
-  }
-
-  return state;
-}
-
-/**
- * Merge function to handle poll list events (for list of polls)
- * Optimized with shallow copy for better performance
- */
-export function mergePollList(
-  existingState: PollType[],
-  event: OptimisticEvent | ConfirmedEvent,
-): PollType[] {
-  switch (event.name) {
-    case "createPoll": {
-      const newPoll = event.data! as PollType;
-      return [newPoll, ...existingState];
-    }
-
-    case "deletePoll": {
-      const deletedPoll = event.data! as { id: string };
-      return existingState.filter((p) => p.id !== deletedPoll.id);
-    }
-
-    case "vote":
-    case "editPoll":
-    case "deletePollOption": {
-      let updatedPoll: PollType;
-      if ("poll" in (event.data as any)) {
-        updatedPoll = (event.data as { poll: PollType }).poll;
-      } else {
-        updatedPoll = event.data as PollType;
-      }
-
-      return existingState.map((poll) =>
-        poll.id === updatedPoll.id ? updatedPoll : poll,
-      );
-    }
-
-    default:
-      console.error("unknown poll list event", event);
-      return existingState;
-  }
-}
+// Removed Ably-related merge functions:
+// - mergePoll
+// - mergePollList
+// These are no longer needed after removing Ably real-time updates

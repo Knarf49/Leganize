@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { createPoll } from "@/lib/models/mutations";
-import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 //TODO: ทำให้ UI update realtime
@@ -33,8 +32,7 @@ export default function CreatePollPage() {
 
     setIsSubmitting(true);
     try {
-      const mutationId = uuidv4();
-      await createPoll(mutationId, userId, question, filteredOptions);
+      await createPoll(question, filteredOptions);
       router.push("/poll");
     } catch (error) {
       console.error("Failed to create poll:", error);

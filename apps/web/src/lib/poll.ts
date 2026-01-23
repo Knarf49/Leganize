@@ -64,38 +64,31 @@ export async function getPolls(userId?: string): Promise<PollType[]> {
 }
 
 /**
- * Get all polls with sequence ID for models sync
+ * Get all polls without sequence ID (no longer using Ably sync)
  */
 export async function getPollsWithSequence(
   userId?: string,
 ): Promise<[PollType[], number]> {
-  // No need for transaction for read operations
-  // Execute queries independently for better performance
-  const [polls, sequenceResult] = await Promise.all([
-    prisma.poll.findMany({
-      include: {
-        options: {
-          include: {
-            _count: {
-              select: { votes: true },
-            },
+  const polls = await prisma.poll.findMany({
+    include: {
+      options: {
+        include: {
+          _count: {
+            select: { votes: true },
           },
         },
-        votes: userId
-          ? {
-              where: { userId },
-              select: { optionId: true },
-            }
-          : false,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    prisma.$queryRaw<
-      { nextval: number }[]
-    >`SELECT nextval('app."Outbox_sequence_id_seq"')::integer`,
-  ]);
+      votes: userId
+        ? {
+            where: { userId },
+            select: { optionId: true },
+          }
+        : false,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const pollsData = polls.map((poll) => ({
     id: poll.id,
@@ -116,34 +109,17 @@ export async function getPollsWithSequence(
     createdAt: poll.createdAt,
   }));
 
-  const [{ nextval }] = sequenceResult;
-
-  return [pollsData, nextval];
+  return [pollsData, 0]; // Return 0 as dummy sequence ID
 }
 
 /**
- * Get a single poll with vote counts and next sequence ID
+ * Get a single poll without sequence ID
  */
 export async function getPoll(
   id: string,
   userId?: string,
 ): Promise<[PollType, number]> {
-  return await prisma.$transaction(async (tx) => {
-    const poll = await getPollTx(tx, id, userId);
-    type r = { nextval: number };
-    const [{ nextval }] = await tx.$queryRaw<
-      r[]
-    >`SELECT nextval('outbox_sequence_id_seq')::integer`;
-    return [poll, nextval];
-  });
-}
-
-async function getPollTx(
-  tx: TxClient,
-  id: string,
-  userId?: string,
-): Promise<PollType> {
-  const poll = await tx.poll.findUniqueOrThrow({
+  const poll = await prisma.poll.findUniqueOrThrow({
     where: { id },
     include: {
       options: {
@@ -162,7 +138,7 @@ async function getPollTx(
     },
   });
 
-  return {
+  const pollData: PollType = {
     id: poll.id,
     question: poll.question,
     options: poll.options.map((option) => ({
@@ -180,6 +156,8 @@ async function getPollTx(
         : undefined,
     createdAt: poll.createdAt,
   };
+
+  return [pollData, 0]; // Return 0 as dummy sequence ID
 }
 
 /**

@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 import { NextRequest, NextResponse } from "next/server";
-import { deletePoll, getPoll, withOutboxWrite } from "@/lib/poll";
+import { getPoll } from "@/lib/poll";
 import { auth } from "@/lib/auth/auth-node";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _: NextRequest,
@@ -48,7 +49,6 @@ export async function DELETE(
       );
 
     const { id } = await params;
-    const mutationId = request.headers.get("x-mutation-id") ?? undefined;
 
     if (!id) {
       return NextResponse.json(
@@ -57,19 +57,16 @@ export async function DELETE(
       );
     }
 
-    if (!mutationId) {
-      return NextResponse.json(
-        { message: "x-mutation-id header is required" },
-        { status: 400 },
-      );
-    }
+    // Delete poll (cascades to options and votes)
+    await prisma.poll.delete({
+      where: { id },
+    });
 
-    const data = await withOutboxWrite(deletePoll, mutationId, id);
-    return NextResponse.json({ data });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("failed to delete poll", error);
     return NextResponse.json(
-      { message: "failed to delte poll", error },
+      { message: "failed to delete poll", error },
       { status: 500 },
     );
   }
