@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth-node";
 import { vote, withOutboxWrite } from "@/lib/poll";
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import * as Ably from "ably";
 
 const ably = new Ably.Rest(process.env.NEXT_PUBLIC_ABLY_API_KEY || "");

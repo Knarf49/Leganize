@@ -4,7 +4,7 @@ export const fetchCache = "force-no-store";
 import { NextRequest, NextResponse } from "next/server";
 import { createPoll, getPollsWithSequence, withOutboxWrite } from "@/lib/poll";
 import { auth } from "@/lib/auth/auth-node";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import * as Ably from "ably";
 
 const ably = new Ably.Rest(process.env.NEXT_PUBLIC_ABLY_API_KEY || "");
