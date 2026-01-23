@@ -1,9 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import * as runtime from "@prisma/client/runtime/client.js";
-import {
-  Prisma,
-  PrismaClient,
-} from "../../../../prisma/src/generated/prisma/client";
+import { Prisma, PrismaClient } from "../../generated/prisma/client/client";
 
 export type PollOptionType = {
   id: string;
