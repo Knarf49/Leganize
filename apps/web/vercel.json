@@ -1,4 +1,0 @@
-{
-  "installCommand": "npm install",
-  "buildCommand": "npm install && turbo run build --filter=web"
-}
