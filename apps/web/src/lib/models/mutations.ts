@@ -79,18 +79,15 @@ export async function deletePollOption(pollId: string, optionId: string) {
  * Merge function for a single poll
  * Used by Ably Models to handle optimistic concurrency control
  */
-export function mergePoll(
-  existingPoll: any,
-  updatedPoll: any,
-): any {
+export function mergePoll(existingPoll: any, updatedPoll: any): any {
   // If there's no existing poll, use the updated one
   if (!existingPoll) return updatedPoll;
-  
+
   // If the update has a higher or equal sequence ID, use it
   if (updatedPoll.sequenceId >= existingPoll.sequenceId) {
     return updatedPoll;
   }
-  
+
   // Otherwise keep the existing one
   return existingPoll;
 }
@@ -99,18 +96,15 @@ export function mergePoll(
  * Merge function for a list of polls
  * Used by Ably Models to handle optimistic concurrency control
  */
-export function mergePollList(
-  existingPolls: any,
-  updatedPolls: any,
-): any {
+export function mergePollList(existingPolls: any, updatedPolls: any): any {
   // If there's no existing list, use the updated one
   if (!existingPolls) return updatedPolls;
-  
+
   // If the update has a higher or equal sequence ID, use it
   if (updatedPolls.sequenceId >= existingPolls.sequenceId) {
     return updatedPolls;
   }
-  
+
   // Otherwise keep the existing one
   return existingPolls;
 }
